@@ -11,6 +11,8 @@ from dungeon_master import DungeonMaster, Input
 from user import User
 from room import Room
 
+from colorama import Fore, Back, Style
+
 
 load_dotenv()
 
@@ -29,6 +31,7 @@ def handle_connect():
     # Save the user's session ID
     session_id = request.sid
     print('Client connected:', session_id)
+    print_state()
 
 
 @socketio.on('disconnect')
@@ -44,7 +47,7 @@ def handle_disconnect():
             send_rooms_update()
         del users[session_id]
     print(msg)
-
+    print_state()
 
 @socketio.on('login')
 def handle_login(data):
@@ -54,6 +57,7 @@ def handle_login(data):
     users[new_user.sid] = new_user
     send_rooms_update(new_user)
     print('New user:', name)
+    print_state()
 
 
 @socketio.on('create_room')
@@ -67,8 +71,11 @@ def handle_create_room(data):
         room_id += 1
     new_room = Room(room_id, name, description, owner)
     rooms[room_id] = new_room
+    owner.join(new_room)
     send_rooms_update()
+    emit('joined_room', new_room.to_dict(), room=owner.sid)
     print('New room:', name)
+    print_state()
 
 
 @socketio.on('join_room')
@@ -79,16 +86,55 @@ def handle_join_room(data):
     user = users[request.sid]
     user.join(room)
     send_rooms_update()
+    emit('joined_room', room.to_dict(), room=user.sid)
     print(user, 'joined', room)
+    print_state()
 
 
 @socketio.on('leave_room')
 def handle_leave_room():
     # Leave the room and send an update to all users
     user = users[request.sid]
+    room = user.room
+    if room is None:
+        send_error('You are not in a room', user.sid)
+        return
+
     user.leave_room()
+    if len(room.users) == 0:
+        del rooms[room.id]
+    elif room.owner == user:
+        room.owner = room.users[0]
     send_rooms_update()
+    emit('joined_room', room.to_dict(), room=user.sid)
     print(user, 'left the room')
+    print_state()
+
+
+@socketio.on('start_game')
+def handle_start_game(data):
+    # Start the game and send an update to all users
+    user = users[request.sid]
+    room_id = data['room_id']
+    room = rooms[room_id]
+
+    if user != room.owner:
+        send_error('Only the owner can start the game', user.sid)
+        return
+    
+    if len(room.users) < 2:
+        send_error('You need at least 2 characters to start the game', user.sid)
+        return
+
+    if user not in room.users or user.room != room:
+        send_error('You must be in the room to start the game', user.sid)
+        return
+    
+    room.start_game()
+    send_rooms_update()
+    print(user, 'started the game')
+    print_state()
+
 
 
 
@@ -108,7 +154,32 @@ def send_rooms_update(user=None):
             emit(event, rooms_list, room=user.sid) 
     else:
         emit(event, rooms_list, room=user.sid)
+
+    print_state()
+
+
+def send_error(error_message, sid):
+    # Sends an error message to a user
+    emit('error', error_message, room=sid)
+    print_state()
         
+
+
+def print_state():
+    print(f"{Fore.LIGHTWHITE_EX}Users:{Style.RESET_ALL}")
+    for user in users.values():
+        if user.room:
+            print(f"  {Fore.GREEN}{user.name}{Style.RESET_ALL} in {Fore.BLUE}{user.room.name}{Style.RESET_ALL}")
+        else:
+            print(f"  {Fore.GREEN}{user.name}{Style.RESET_ALL} not in a room")
+    print()
+    print(f"{Fore.LIGHTWHITE_EX}Rooms:{Style.RESET_ALL}")
+    for room in rooms.values():
+        print(f"  {Fore.BLUE}{room.name}{Style.RESET_ALL} ({len(room.users)} users)")
+        for user in room.users:
+            print(f"    {Fore.GREEN}{user.name}{Style.RESET_ALL}")
+    print()
+
 
 
 
