@@ -1,4 +1,10 @@
+# Common
+python-dotenv
+
+# Server
 Flask
 Flask-SocketIO
-python-dotenv
 flask_cors
+
+# AI
+openai
