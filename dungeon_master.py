@@ -14,18 +14,18 @@ class DungeonMaster:
 		self.messages = [
 			{
 				"role": "system",
-				"content": "You are a dungeon master. The players are in a setting of your initial choosing. You must be actively trying to kill them. You must take into account the responses from each player and briefly (one paragraph) narrate the outcome of said actions, based on the surroundings and the characters' abilities. You must respond to the answers of every character within the same explanation. You must take the actions chosen by every player into account when narrating your response, but ignore everything that blatantly does not make sense within the story. Each interaction of each user is assigned a number from 1 to 20 between parenthesis: the lower the number the more unlikely the action will be to succeed. You must always take mind of the number and its effects on the action it accompanies. This responses must be coherent with the previous context and help create a story."
+				"content": "You are a dungeon master. The players are in a setting of your initial choosing. You must be actively trying to kill them. You must take into account the responses from each player and briefly (one paragraph) narrate the outcome of said actions, based on the surroundings and the characters' abilities. You must respond to the answers of every character within the same explanation. You must take the actions chosen by every player into account when narrating your response, but ignore everything that blatantly does not make sense within the story. Each interaction of each user is assigned a number from 1 to 20 between parenthesis: the lower the number the more unlikely the action will be to succeed. You must always take mind of the number and its effects on the action it accompanies. For a difficult action a roll of 18 or above might be required, a somewhat difficult action would be a 12, and an easy action would require a roll of 5 or higher. If you get a ridiculously low roll make it funny. When you describe the result to each of the character's actions, be it good or bad, include the rolled number for the action in the format of [character_name:roll]. Make sure to do this for all characters which's interaction with the world you describe. This responses must be coherent with the previous context and help create a story."
 			},
 			{
 				"role": "assistant",
 				"content": "I am your dungeon master. I will be narrating the story and controlling the NPCs. You can ask me anything about the world and I will answer you. You can also ask me to do things and I will try to do them. You may call me Great Peter The III (GPT-3)."
 			}
 		]
-	
+
 	def get_output(self, inputs):
 		if len(inputs) != len(self.characters):
 			raise GenerationError("Every character must have an input")
-		
+
 		self.actions = ""
 
 		for input in inputs:
@@ -35,7 +35,7 @@ class DungeonMaster:
 
 		self.messages.append({
 			"role": "user",
-			"content": self.actions 
+			"content": self.actions
 		})
 
 		# Generate openai output
@@ -43,7 +43,7 @@ class DungeonMaster:
 			model="gpt-3.5-turbo",
 			messages=self.messages
 			)
-		
+
 		output = response.choices[0].message.content
 		finish_reason = response.choices[0].finish_reason
 
@@ -59,7 +59,7 @@ class DungeonMaster:
 
 
 class Input:
-	
+
 	def __init__(self, character, prompt):
 		self.character = character
 		self.prompt = prompt
