@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, session
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit
 
 
 load_dotenv()
@@ -33,24 +33,6 @@ def handle_disconnect():
     username = users[session_id]
     del users[session_id]
     print('Client disconnected:', session_id, username)
-
-
-@socketio.on('join')
-def handle_join(data):
-    # Update the user's username and join their personal room
-    session_id = request.sid
-    username = data['username']
-    users[session_id] = username
-    join_room(session_id)
-    print('User joined:', username)
-
-
-@socketio.on('leave')
-def handle_leave():
-    # Remove the user from their personal room
-    session_id = request.sid
-    leave_room(session_id)
-    print('User left:', users[session_id])
 
 
 @socketio.on('message')
