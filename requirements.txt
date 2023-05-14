@@ -9,3 +9,6 @@ flask_cors
 
 # AI
 openai
+
+#DEPLOY
+gunicorn
