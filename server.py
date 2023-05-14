@@ -26,6 +26,9 @@ app.config['CORS_ALLOW_HEADERS'] = 'Content-Type'
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# attach the CORS object to your app
+cors.init_app(app)
+
 users = {}
 rooms = {}
 
