@@ -11,5 +11,5 @@ flask_cors
 openai
 
 #DEPLOY
-unicorn==20.1.0
+unicorn
 gunicorn
