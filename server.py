@@ -21,7 +21,7 @@ from colorama import Fore, Back, Style
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-cors = CORS(app, resources={r"/*": {"origin": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['CORS_ALLOW_HEADERS'] = 'Content-Type'
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -250,4 +250,4 @@ if __name__ == '__main__':
 	port = int(os.getenv('PORT'))
 
 	print(f'Starting server on {host}:{port}')
-	socketio.run(app, host=host, port=port, allow_unsafe_werkzeug=True)
+	socketio.run(app, host=host, port=port, debug=True)
