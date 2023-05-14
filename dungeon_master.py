@@ -31,7 +31,7 @@ class DungeonMaster:
 		for input in inputs:
 			if input.character not in self.characters:
 				raise GenerationError(f"Input character '{input.character.name}' not found")
-			self.actions += input.character.name + " responds " + input.prompt + "(" + str(random.randint(1,20)) + "); "
+			self.actions += input.character.name + " responds " + input.prompt + "(" + str(input.roll) + "); "
 
 		self.messages.append({
 			"role": "user",
@@ -63,6 +63,7 @@ class Input:
 	def __init__(self, character, prompt):
 		self.character = character
 		self.prompt = prompt
+		self.roll
 
 
 	def __str__(self):
