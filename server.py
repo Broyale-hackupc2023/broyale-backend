@@ -175,6 +175,7 @@ def handle_send_input(data):
     update_room_messages(room)
 
     if room.are_all_inputs_received():
+        room.inputs = {}
         print("All inputs received")
         messages = room.messages
         
