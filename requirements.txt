@@ -9,3 +9,4 @@ flask_cors
 
 # AI
 openai
+unicorn==20.1.0
