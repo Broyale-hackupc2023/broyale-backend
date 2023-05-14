@@ -7,9 +7,12 @@ from flask_socketio import SocketIO, emit
 
 from character import Character
 from dungeon_master import DungeonMaster, Input
+from message import UserMessage, AssistantMessage
 
 from user import User
 from room import Room
+
+import random
 
 from colorama import Fore, Back, Style
 
@@ -132,10 +135,61 @@ def handle_start_game(data):
     
     room.start_game()
     send_rooms_update()
+    for user in room.users:
+        emit('ask_for_input', room.to_dict(), room=user.sid)
     print(user, 'started the game')
     print_state()
 
 
+@socketio.on('send_input')
+def handle_send_input(data):
+    # Send an input to the game
+    user = users[request.sid]
+    room = user.room
+    if room is None:
+        send_error('You are not in a room', user.sid)
+        return
+
+    if not room.active:
+        send_error('The game has not started yet', user.sid)
+        return
+
+    if user not in room.users:
+        send_error('You are not in this game', user.sid)
+        return
+
+    if user.sid in room.inputs:
+        send_error('You have already sent an input', user.sid)
+        return
+
+    prompt = data['input']
+    roll = random.randint(1, 20)
+    input = Input(user, prompt, roll)
+    print(f"New input:")
+    print(input)
+
+    room.add_input(user, input)
+    update_room_messages(room)
+
+    if room.are_all_inputs_received():
+        print("All inputs received")
+        messages = room.messages
+        for input in room.inputs.values():
+            new_message = UserMessage(input.user, input.prompt, input.roll)
+            messages.append(new_message)
+        
+        print("Generating output...")
+        output = room.dungeon_master.get_output(room.inputs.values())
+        print("Output generated: ", output)
+        messages.append(AssistantMessage(output))
+
+        room.messages = messages
+
+        update_room_messages(room)
+        for user in room.users:
+            emit('ask_for_input', room=user.sid)
+    else:
+        print(f"Waiting for {len(room.users) - len(room.inputs)} more inputs")
 
 
 
@@ -155,6 +209,16 @@ def send_rooms_update(user=None):
     else:
         emit(event, rooms_list, room=user.sid)
 
+    print_state()
+
+def update_room_messages(room):
+    # Sends a list of messages to all users in a room
+    messages_list = []
+    for message in room.messages:
+        messages_list.append(message.to_dict())
+    event = 'room_messages_update'
+    for user in room.users:
+        emit(event, messages_list, room=user.sid)
     print_state()
 
 

@@ -1,4 +1,5 @@
 import random
+from dungeon_master import DungeonMaster
 
 class Room:
 
@@ -10,6 +11,11 @@ class Room:
 		self.users = []
 		self.max_users = 5
 		self.active = False
+
+		self.inputs = {}
+		self.messages = []
+
+		self.dungeon_master = None
 
 	
 	def __str__(self):
@@ -30,6 +36,22 @@ class Room:
 	
 	def start_game(self):
 		self.active = True
+		characters = [user.name for user in self.users]
+		self.dungeon_master = DungeonMaster(characters)
+
+
+	def add_input(self, user, input):
+		self.inputs[user.sid] = input
+
+	def are_all_inputs_received(self):
+		if len(self.users) != len(self.inputs):
+			return False
+		# Check that all users have submitted an input
+		for user in self.users:
+			if user.sid not in self.inputs:
+				return False
+		return True
+
 
 
 	def to_dict(self):

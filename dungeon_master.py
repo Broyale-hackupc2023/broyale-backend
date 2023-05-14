@@ -29,9 +29,9 @@ class DungeonMaster:
 		self.actions = ""
 
 		for input in inputs:
-			if input.character not in self.characters:
-				raise GenerationError(f"Input character '{input.character.name}' not found")
-			self.actions += input.character.name + " responds " + input.prompt + "(" + str(input.roll) + "); "
+			if input.user.name not in self.characters:
+				raise GenerationError(f"Input character '{input.user.name}' not found")
+			self.actions += input.user.name + " responds " + input.prompt + "(" + str(input.roll) + "); "
 
 		self.messages.append({
 			"role": "user",
@@ -60,14 +60,14 @@ class DungeonMaster:
 
 class Input:
 
-	def __init__(self, character, prompt):
-		self.character = character
+	def __init__(self, user, prompt, roll):
+		self.user = user
 		self.prompt = prompt
-		self.roll
+		self.roll = roll
 
 
 	def __str__(self):
-		return f"[{self.character.name}] {self.prompt}"
+		return f"[{self.user.name}]: {self.prompt} ({self.roll})"
 
 # Define a GenerationError
 class GenerationError(Exception):
