@@ -16,6 +16,7 @@ class User:
 		if self.room is not None:
 			self.room.remove_user(self)
 		room.add_user(self)
+		self.room = room
 
 
 	def leave_room(self):

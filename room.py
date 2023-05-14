@@ -9,6 +9,7 @@ class Room:
 		self.owner = owner
 		self.users = []
 		self.max_users = 5
+		self.active = False
 
 	
 	def __str__(self):
@@ -26,13 +27,18 @@ class Room:
 			self.users.remove(user)
 			user.room = None
 
+	
+	def start_game(self):
+		self.active = True
+
 
 	def to_dict(self):
 		return {
 			'id': self.id,
 			'name': self.name,
 			'description': self.description,
-			'owner': self.owner.name,
+			'owner': self.owner.to_dict(),
 			'players': [user.to_dict() for user in self.users],
 			'max_players': self.max_users,
+			'active': self.active,
 		}
