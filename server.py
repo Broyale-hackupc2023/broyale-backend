@@ -250,4 +250,4 @@ if __name__ == '__main__':
 	port = int(os.getenv('PORT'))
 
 	print(f'Starting server on {host}:{port}')
-	socketio.run(app, host=host, port=port, debug=True)
+	socketio.run(app, host=host, port=port, debug=True, allow_unsafe_werkzeug=True)
