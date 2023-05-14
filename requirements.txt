@@ -9,4 +9,7 @@ flask_cors
 
 # AI
 openai
+
+#DEPLOY
 unicorn==20.1.0
+gunicorn
