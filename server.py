@@ -174,9 +174,6 @@ def handle_send_input(data):
     if room.are_all_inputs_received():
         print("All inputs received")
         messages = room.messages
-        for input in room.inputs.values():
-            new_message = UserMessage(input.user, input.prompt, input.roll)
-            messages.append(new_message)
         
         print("Generating output...")
         output = room.dungeon_master.get_output(room.inputs.values())
@@ -184,7 +181,7 @@ def handle_send_input(data):
         messages.append(AssistantMessage(output))
 
         room.messages = messages
-
+        print("MESSAGES: ", messages)
         update_room_messages(room)
         for user in room.users:
             emit('ask_for_input', room=user.sid)
@@ -216,6 +213,7 @@ def update_room_messages(room):
     messages_list = []
     for message in room.messages:
         messages_list.append(message.to_dict())
+    print("MESSAGES LIST: ", messages_list)
     event = 'room_messages_update'
     for user in room.users:
         emit(event, messages_list, room=user.sid)

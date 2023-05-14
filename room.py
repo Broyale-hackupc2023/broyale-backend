@@ -1,5 +1,6 @@
 import random
 from dungeon_master import DungeonMaster
+from message import UserMessage, AssistantMessage
 
 class Room:
 
@@ -42,6 +43,8 @@ class Room:
 
 	def add_input(self, user, input):
 		self.inputs[user.sid] = input
+		self.messages.append(UserMessage(input.user, input.prompt, input.roll))
+
 
 	def are_all_inputs_received(self):
 		if len(self.users) != len(self.inputs):
